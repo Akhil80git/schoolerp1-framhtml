@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Attendance - EduManage</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f39c12;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 32px;
+        }
+
+        .header h1 i {
+            color: #f39c12;
+            margin-right: 10px;
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e0e0e0;
+        }
+
+        .filter-input {
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            min-width: 200px;
+            transition: 0.3s;
+        }
+
+        .filter-input:focus {
+            border-color: #f39c12;
+            outline: none;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #219653;
+            transform: translateY(-2px);
+        }
+
+        .attendance-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background-color: #fef5e7;
+        }
+
+        .teacher-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .teacher-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #f39c12;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-excellent {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #27ae60;
+        }
+
+        .badge-good {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #f39c12;
+        }
+
+        .badge-poor {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .progress-bar {
+            width: 100px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #27ae60;
+            border-radius: 4px;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: #fef5e7;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f39c12;
+            font-size: 24px;
+        }
+
+        .stat-info h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-info p {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-calendar-check"></i> Teacher Attendance</h1>
+        <button class="btn btn-success" id="exportBtn">
+            <i class="fas fa-download"></i> Export Report
+        </button>
+    </div>
+
+    <div class="stats-cards" id="statsCards">
+        <!-- Stats will be loaded here -->
+    </div>
+
+    <div class="filter-bar">
+        <input type="month" id="monthFilter" class="filter-input" value="2024-01">
+        <select id="teacherFilter" class="filter-input">
+            <option value="all">All Teachers</option>
+        </select>
+        <select id="performanceFilter" class="filter-input">
+            <option value="all">All Performance</option>
+            <option value="excellent">Excellent (90%+)</option>
+            <option value="good">Good (70-89%)</option>
+            <option value="poor">Needs Improvement (<70%)</option>
+        </select>
+        <button class="btn btn-primary" id="applyFilters">
+            <i class="fas fa-filter"></i> Apply Filters
+        </button>
+        <button class="btn btn-primary" id="resetFilters">
+            <i class="fas fa-undo"></i> Reset
+        </button>
+    </div>
+
+    <div class="attendance-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Teacher Name</th>
+                    <th>Present</th>
+                    <th>Late</th>
+                    <th>Half Days</th>
+                    <th>Absent</th>
+                    <th>Performance</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceTable">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const teachersData = [
+            {
+                id: 1,
+                name: "Raj Kumar Sharma",
+                image: "https://randomuser.me/api/portraits/men/32.jpg",
+                attendance: {
+                    present: 22,
+                    late: 3,
+                    lateHours: 2.5,
+                    halfDays: 1,
+                    absent: 4
+                }
+            },
+            {
+                id: 2,
+                name: "Priya Singh",
+                image: "https://randomuser.me/api/portraits/women/44.jpg",
+                attendance: {
+                    present: 28,
+                    late: 0,
+                    lateHours: 0,
+                    halfDays: 0,
+                    absent: 2
+                }
+            },
+            {
+                id: 3,
+                name: "Amit Kumar",
+                image: "https://randomuser.me/api/portraits/men/67.jpg",
+                attendance: {
+                    present: 24,
+                    late: 2,
+                    lateHours: 1.5,
+                    halfDays: 0,
+                    absent: 4
+                }
+            },
+            {
+                id: 4,
+                name: "Neha Gupta",
+                image: "https://randomuser.me/api/portraits/women/68.jpg",
+                attendance: {
+                    present: 20,
+                    late: 5,
+                    lateHours: 4,
+                    halfDays: 2,
+                    absent: 3
+                }
+            },
+            {
+                id: 5,
+                name: "Suresh Patel",
+                image: "https://randomuser.me/api/portraits/men/45.jpg",
+                attendance: {
+                    present: 26,
+                    late: 1,
+                    lateHours: 1,
+                    halfDays: 1,
+                    absent: 2
+                }
+            }
+        ];
+
+        function loadStats() {
+            const totalTeachers = teachersData.length;
+            let totalPresent = 0, totalLate = 0, totalAbsent = 0;
+            
+            teachersData.forEach(t => {
+                totalPresent += t.attendance.present;
+                totalLate += t.attendance.late;
+                totalAbsent += t.attendance.absent;
+            });
+
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Teachers</h3>
+                        <p>${totalTeachers}</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Present</h3>
+                        <p>${totalPresent} days</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Late</h3>
+                        <p>${totalLate} times</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Absent</h3>
+                        <p>${totalAbsent} days</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('statsCards').innerHTML = statsHtml;
+        }
+
+        function loadTeacherFilter() {
+            const select = document.getElementById('teacherFilter');
+            teachersData.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t.id;
+                option.textContent = t.name;
+                select.appendChild(option);
+            });
+        }
+
+        function loadAttendanceData(filterTeacher = 'all', filterPerf = 'all') {
+            const tbody = document.getElementById('attendanceTable');
+            tbody.innerHTML = '';
+
+            let filtered = [...teachersData];
+
+            if (filterTeacher !== 'all') {
+                filtered = filtered.filter(t => t.id == filterTeacher);
+            }
+
+            filtered.forEach((teacher, index) => {
+                const total = teacher.attendance.present + teacher.attendance.late + 
+                             teacher.attendance.halfDays + teacher.attendance.absent;
+                const percent = Math.round((teacher.attendance.present / total) * 100);
+                
+                let badgeClass = 'badge-poor';
+                let status = 'Needs Improvement';
+                
+                if (percent >= 90) {
+                    badgeClass = 'badge-excellent';
+                    status = 'Excellent';
+                } else if (percent >= 70) {
+                    badgeClass = 'badge-good';
+                    status = 'Good';
+                }
+
+                if (filterPerf !== 'all') {
+                    if (filterPerf === 'excellent' && percent < 90) return;
+                    if (filterPerf === 'good' && (percent < 70 || percent >= 90)) return;
+                    if (filterPerf === 'poor' && percent >= 70) return;
+                }
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <div class="teacher-info">
+                            <img src="${teacher.image}" class="teacher-img">
+                            ${teacher.name}
+                        </div>
+                    </td>
+                    <td>${teacher.attendance.present} days</td>
+                    <td>${teacher.attendance.late} (${teacher.attendance.lateHours} hrs)</td>
+                    <td>${teacher.attendance.halfDays}</td>
+                    <td>${teacher.attendance.absent}</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percent}%"></div>
+                        </div>
+                        ${percent}%
+                    </td>
+                    <td><span class="badge ${badgeClass}">${status}</span></td>
+                `;
+            });
+        }
+
+        function exportReport() {
+            alert('Downloading attendance report...');
+        }
+
+        // Event Listeners
+        document.getElementById('applyFilters').addEventListener('click', () => {
+            const teacher = document.getElementById('teacherFilter').value;
+            const perf = document.getElementById('performanceFilter').value;
+            loadAttendanceData(teacher, perf);
+        });
+
+        document.getElementById('resetFilters').addEventListener('click', () => {
+            document.getElementById('teacherFilter').value = 'all';
+            document.getElementById('performanceFilter').value = 'all';
+            loadAttendanceData('all', 'all');
+        });
+
+        document.getElementById('exportBtn').addEventListener('click', exportReport);
+
+        document.getElementById('monthFilter').addEventListener('change', (e) => {
+            alert(`Loading attendance for ${e.target.value}`);
+        });
+
+        // Initialize
+        loadStats();
+        loadTeacherFilter();
+        loadAttendanceData();
+    </script>
+</body>
+</html>

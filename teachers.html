@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>School Admission Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: #333;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+h1 {
+    font-size: 2.8rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    font-weight: 300;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.admin-toggle {
+    margin-top: 20px;
+}
+
+.admin-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.admin-btn:hover {
+    background: white;
+    color: #1e3c72;
+}
+
+/* Classes Grid */
+.classes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.class-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    border-top: 5px solid #4a6bff;
+}
+
+.class-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.class-header {
+    background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 25px;
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+    position: relative;
+}
+
+.class-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.class-fee {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #10b981;
+}
+
+/* Admin Edit Button */
+.edit-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    opacity: 0;
+}
+
+.class-card:hover .edit-btn {
+    opacity: 1;
+}
+
+.edit-btn:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+}
+
+/* Status Info */
+.status-info {
+    padding: 20px;
+    background: #f8fafc;
+    margin: 15px;
+    border-radius: 12px;
+    border-left: 4px solid #3b82f6;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.status-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.status-label {
+    font-weight: 500;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.available-count {
+    color: #10b981;
+}
+
+.normal-wait-count {
+    color: #f59e0b;
+}
+
+/* Waiting List Limit Warning */
+.waiting-limit {
+    margin: 10px 15px;
+    padding: 10px;
+    background: #fef3c7;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    font-size: 0.9rem;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Closed Class Styling */
+.class-card.closed {
+    border-top: 5px solid #dc2626;
+    opacity: 0.9;
+}
+
+.class-card.closed .class-header {
+    background: linear-gradient(90deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.class-card.closed .status-info {
+    background: #fef2f2;
+    border-left: 4px solid #dc2626;
+}
+
+.closed-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #dc2626;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    z-index: 2;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin: 25px 15px 15px;
+}
+
+.btn {
+    padding: 16px 20px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-available {
+    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+    color: white;
+}
+
+.btn-available:hover {
+    background: linear-gradient(90deg, #0da271 0%, #2bbf87 100%);
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+}
+
+.btn-confirm-seat {
+    background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+    color: white;
+}
+
+.btn-confirm-seat:hover {
+    background: linear-gradient(90deg, #2563eb 0%, #4f7cf0 100%);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+}
+
+.btn-normal-wait {
+    background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+    color: white;
+}
+
+.btn-normal-wait:hover {
+    background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+}
+
+.btn-disabled {
+    background: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+.btn-disabled:hover {
+    background: #cbd5e1;
+    box-shadow: none;
+}
+
+.btn-closed {
+    background: #dc2626;
+    color: white;
+    cursor: not-allowed;
+}
+
+.btn-closed:hover {
+    background: #dc2626;
+    box-shadow: none;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 25px;
+    margin-top: 40px;
+    color: #64748b;
+    font-size: 0.9rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalFade 0.3s ease;
+}
+
+@keyframes modalFade {
+    from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-content {
+    padding: 40px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    padding-right: 30px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 2rem;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.3s;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.close-modal:hover {
+    color: #1e293b;
+    background: #f1f5f9;
+}
+
+.modal-body {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #475569;
+    margin-bottom: 30px;
+}
+
+.modal-highlight {
+    background: #f1f5f9;
+    padding: 25px;
+    border-radius: 12px;
+    margin: 25px 0;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #1e293b;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.modal-btn {
+    padding: 14px 28px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 140px;
+}
+
+.modal-btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.modal-btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+}
+
+.modal-btn-secondary {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.modal-btn-secondary:hover {
+    background: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.modal-btn-back {
+    background: #94a3b8;
+    color: white;
+}
+
+.modal-btn-back:hover {
+    background: #64748b;
+    transform: translateY(-2px);
+}
+
+/* Payment Options */
+.payment-options {
+    margin: 20px 0;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.payment-option:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+}
+
+.payment-option.selected {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+.payment-option input {
+    margin-right: 10px;
+}
+
+.payment-details {
+    flex-grow: 1;
+}
+
+.payment-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.payment-amount {
+    font-weight: 700;
+    color: #10b981;
+    font-size: 1.2rem;
+}
+
+/* Success Modal */
+.success-modal .modal-body {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.success-icon {
+    font-size: 4rem;
+    color: #10b981;
+    margin-bottom: 20px;
+}
+
+/* Admin Edit Form */
+.edit-form {
+    margin: 20px 0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .classes-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    h1 {
+        font-size: 2.2rem;
+    }
+    
+    .header {
+        padding: 20px;
+    }
+    
+    .modal-container {
+        width: 95%;
+        max-height: 85vh;
+    }
+    
+    .modal-content {
+        padding: 25px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .modal-btn {
+        width: 100%;
+    }
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1><i class="fas fa-graduation-cap"></i> School Admission Portal</h1>
+            <p class="subtitle">Admission for Academic Year 2023-24</p>
+            
+            <div class="admin-toggle">
+                <button class="admin-btn" onclick="toggleAdminMode()">
+                    <i class="fas fa-cog"></i> Admin Mode
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Classes Grid -->
+    <div id="classes" class="classes-grid"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2023 St. Xavier's High School Admission System</p>
+        <p>Contact: admissions@school.edu | Phone: +91 98765 43210</p>
+    </footer>
+</div>
+
+<!-- Modal Overlay -->
+<div id="modalOverlay" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Admission Process</h3>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content will be inserted here -->
+            </div>
+            <div class="modal-actions" id="modalActions">
+                <!-- Modal actions will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Data with available seats and waiting list
+const data = [
+    {name: "Class 5", fee: 5500, available: 5, normalWaiting: 0, isClosed: false},
+    {name: "Class 6", fee: 6000, available: 0, normalWaiting: 2, isClosed: false},
+    {name: "Class 7", fee: 6500, available: 3, normalWaiting: 0, isClosed: false},
+    {name: "Class 8", fee: 7000, available: 0, normalWaiting: 3, isClosed: false},
+    {name: "Class 9", fee: 7500, available: 7, normalWaiting: 1, isClosed: false},
+    {name: "Class 10", fee: 8000, available: 0, normalWaiting: 3, isClosed: false}
+];
+
+// Waiting list limit - sirf 3 users allowed
+const WAITING_LIST_LIMIT = 3;
+
+// Track seat numbers
+let seatCounter = {
+    0: 101, // Class 5
+    1: 106, // Class 6
+    2: 107, // Class 7
+    3: 108, // Class 8
+    4: 109, // Class 9
+    5: 110  // Class 10
+};
+
+// Modal elements
+const modalOverlay = document.getElementById("modalOverlay");
+const modalTitle = document.getElementById("modalTitle");
+const modalBody = document.getElementById("modalBody");
+const modalActions = document.getElementById("modalActions");
+const closeModal = document.getElementById("closeModal");
+
+// Variables
+let currentClassIndex = null;
+let selectedPaymentOption = 'yearly'; // Default option
+let adminMode = false;
+
+// Check if class should be closed
+function checkIfClassShouldClose(classData) {
+    // Class close ho jayega agar:
+    // 1. Available seats = 0
+    // 2. Normal waiting = 0 ya waiting list full (3)
+    // Ya already closed hai
+    return classData.isClosed || 
+           (classData.available === 0 && (classData.normalWaiting === 0 || classData.normalWaiting >= WAITING_LIST_LIMIT));
+}
+
+// Check if waiting list is full
+function isWaitingListFull(classData) {
+    return classData.normalWaiting >= WAITING_LIST_LIMIT;
+}
+
+// Toggle admin mode
+function toggleAdminMode() {
+    adminMode = !adminMode;
+    const adminBtn = document.querySelector('.admin-btn');
+    
+    if (adminMode) {
+        adminBtn.innerHTML = '<i class="fas fa-eye-slash"></i> User Mode';
+        adminBtn.style.background = 'white';
+        adminBtn.style.color = '#1e3c72';
+    } else {
+        adminBtn.innerHTML = '<i class="fas fa-cog"></i> Admin Mode';
+        adminBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+        adminBtn.style.color = 'white';
+    }
+    
+    render();
+}
+
+// Render all class cards
+function render() {
+    const classesContainer = document.getElementById("classes");
+    classesContainer.innerHTML = "";
+    
+    data.forEach((c, i) => {
+        const classCard = document.createElement("div");
+        const shouldBeClosed = checkIfClassShouldClose(c);
+        const waitingListFull = isWaitingListFull(c);
+        
+        classCard.className = `class-card ${shouldBeClosed ? 'closed' : ''}`;
+        
+        // Determine button states
+        const hasAvailableSeats = c.available > 0;
+        const isClassClosed = shouldBeClosed;
+        const canJoinWaiting = !hasAvailableSeats && !waitingListFull && !isClassClosed;
+        
+        classCard.innerHTML = `
+            ${isClassClosed ? `
+            <div class="closed-badge">
+                <i class="fas fa-lock"></i> ADMISSION CLOSED
+            </div>
+            ` : ''}
+            
+            <div class="class-header">
+                <div class="class-name">${c.name}</div>
+                <div class="class-fee">₹${c.fee}/year</div>
+                
+                ${adminMode ? `
+                <button class="edit-btn" onclick="showEditModal(${i})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                ` : ''}
+            </div>
+            
+            <div class="status-info">
+                <div class="status-item">
+                    <div class="status-label">
+                        <i class="fas fa-chair"></i>
+                        <span>Available Seats</span>
+                    </div>
+                    <div class="status-value available-count">${c.available}</div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-label">
+                        <i class="fas fa-list-alt"></i>
+                        <span>Waiting List</span>
+                    </div>
+                    <div class="status-value normal-wait-count">
+                        ${c.normalWaiting} / ${WAITING_LIST_LIMIT} students
+                    </div>
+                </div>
+                
+                ${waitingListFull && !isClassClosed ? `
+                <div class="status-item" style="color: #dc2626;">
+                    <div class="status-label">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Waiting List Status</span>
+                    </div>
+                    <div class="status-value" style="color: #dc2626;">FULL (${WAITING_LIST_LIMIT}/${WAITING_LIST_LIMIT})</div>
+                </div>
+                ` : ''}
+            </div>
+            
+            ${waitingListFull && !hasAvailableSeats && !isClassClosed ? `
+            <div class="waiting-limit">
+                <i class="fas fa-exclamation-circle"></i>
+                Waiting list is full (Max ${WAITING_LIST_LIMIT} students). No more registrations.
+            </div>
+            ` : ''}
+            
+            <div class="action-buttons">
+                ${isClassClosed ? `
+                <button class="btn btn-closed">
+                    <i class="fas fa-lock"></i>
+                    Admission Closed
+                </button>
+                ` : hasAvailableSeats ? `
+                <button class="btn btn-available" onclick="showPaySeatModal(${i})">
+                    <i class="fas fa-check-circle"></i>
+                    Pay & Confirm Admission
+                </button>
+                ` : waitingListFull ? `
+                <button class="btn btn-disabled">
+                    <i class="fas fa-lock"></i>
+                    Confirm Seat (Waiting List Full)
+                </button>
+                ` : `
+                <button class="btn btn-confirm-seat" onclick="showConfirmSeatModal(${i})">
+                    <i class="fas fa-lock"></i>
+                    Confirm Seat (Full Payment)
+                </button>
+                `}
+                
+                ${isClassClosed ? `
+                <button class="btn btn-closed">
+                    <i class="fas fa-times-circle"></i>
+                    Waiting List Closed
+                </button>
+                ` : canJoinWaiting ? `
+                <button class="btn btn-normal-wait" onclick="showNormalWaitingModal(${i})">
+                    <i class="fas fa-list-alt"></i>
+                    Join Waiting List (₹100)
+                </button>
+                ` : !hasAvailableSeats && waitingListFull ? `
+                <button class="btn btn-disabled">
+                    <i class="fas fa-list-alt"></i>
+                    Waiting List Full (${WAITING_LIST_LIMIT}/${WAITING_LIST_LIMIT})
+                </button>
+                ` : `
+                <button class="btn btn-disabled">
+                    <i class="fas fa-list-alt"></i>
+                    Waiting List (Disabled)
+                </button>
+                `}
+            </div>
+        `;
+        
+        classesContainer.appendChild(classCard);
+    });
+}
+
+// Show edit modal for admin
+function showEditModal(i) {
+    const c = data[i];
+    currentClassIndex = i;
+    
+    modalTitle.textContent = `Edit ${c.name}`;
+    modalBody.innerHTML = `
+        <div class="edit-form">
+            <div class="form-group">
+                <label class="form-label">Available Seats</label>
+                <input type="number" id="editAvailable" class="form-input" value="${c.available}" min="0" max="100">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Waiting List Count (Max: ${WAITING_LIST_LIMIT})</label>
+                <input type="number" id="editWaiting" class="form-input" value="${c.normalWaiting}" min="0" max="${WAITING_LIST_LIMIT}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Admission Status</label>
+                <select id="editStatus" class="form-input">
+                    <option value="open" ${!c.isClosed ? 'selected' : ''}>Open</option>
+                    <option value="closed" ${c.isClosed ? 'selected' : ''}>Closed</option>
+                </select>
+            </div>
+            
+            <div class="modal-highlight">
+                Current Seat Number: ${seatCounter[i]}
+                <div style="font-size: 1rem; color: #64748b; margin-top: 5px;">
+                    Next student will get seat: ${seatCounter[i] + 1}
+                </div>
+            </div>
+            
+            <p><em>Note: Waiting list can have maximum ${WAITING_LIST_LIMIT} students.</em></p>
+        </div>
+    `;
+    
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-back" onclick="closeModalFunc()">
+            <i class="fas fa-times"></i> Cancel
+        </button>
+        <button class="modal-btn modal-btn-primary" onclick="saveEditChanges()">
+            <i class="fas fa-save"></i> Save Changes
+        </button>
+    `;
+    
+    openModal();
+}
+
+// Save edit changes
+function saveEditChanges() {
+    const availableInput = document.getElementById('editAvailable');
+    const waitingInput = document.getElementById('editWaiting');
+    const statusSelect = document.getElementById('editStatus');
+    
+    const newAvailable = parseInt(availableInput.value) || 0;
+    const newWaiting = parseInt(waitingInput.value) || 0;
+    
+    // Validate waiting list limit
+    if (newWaiting > WAITING_LIST_LIMIT) {
+        alert(`Waiting list cannot exceed ${WAITING_LIST_LIMIT} students.`);
+        return;
+    }
+    
+    // Update data
+    data[currentClassIndex].available = newAvailable;
+    data[currentClassIndex].normalWaiting = newWaiting;
+    data[currentClassIndex].isClosed = statusSelect.value === 'closed';
+    
+    // Check if class should close based on new values
+    if (newAvailable === 0 && newWaiting >= WAITING_LIST_LIMIT) {
+        data[currentClassIndex].isClosed = true;
+    }
+    
+    closeModalAndRefresh();
+    showSuccessMessage(`
+        <div class="success-icon" style="color: #3b82f6;">
+            <i class="fas fa-save"></i>
+        </div>
+        <h3>Changes Saved!</h3>
+        <p><strong>${data[currentClassIndex].name}</strong></p>
+        <p>Updated successfully.</p>
+        <p><strong>New Status:</strong></p>
+        <ul>
+            <li>Available Seats: ${newAvailable}</li>
+            <li>Waiting List: ${newWaiting} / ${WAITING_LIST_LIMIT}</li>
+            <li>Status: ${data[currentClassIndex].isClosed ? 'Closed' : 'Open'}</li>
+        </ul>
+    `);
+}
+
+// Show modal for Pay & Confirm Seat (When seats available)
+function showPaySeatModal(i) {
+    const c = data[i];
+    currentClassIndex = i;
+    selectedPaymentOption = 'yearly'; // Reset to default
+    
+    modalTitle.textContent = "Confirm Admission";
+    modalBody.innerHTML = `
+        <p>You are confirming admission for <strong>${c.name}</strong>.</p>
+        
+        <div class="modal-highlight">
+            Total Annual Fee: ₹${c.fee}<br>
+            Your Seat Number: ${seatCounter[i]}
+        </div>
+        
+        <p><strong>Select Payment Plan:</strong></p>
+        
+        <div class="payment-options">
+            <div class="payment-option selected" onclick="selectPaymentOption('yearly', ${c.fee})">
+                <input type="radio" name="paymentOption" value="yearly" checked>
+                <div class="payment-details">
+                    <div class="payment-name">Yearly Payment (One-time)</div>
+                    <div class="payment-amount">₹${c.fee}</div>
+                    <div style="font-size: 0.9rem; color: #64748b;">Pay once for entire year</div>
+                </div>
+            </div>
+            
+            <div class="payment-option" onclick="selectPaymentOption('quarterly', ${Math.ceil(c.fee/4)})">
+                <input type="radio" name="paymentOption" value="quarterly">
+                <div class="payment-details">
+                    <div class="payment-name">Quarterly Payment</div>
+                    <div class="payment-amount">₹${Math.ceil(c.fee/4)} per quarter</div>
+                    <div style="font-size: 0.9rem; color: #64748b;">4 payments (3 months each)</div>
+                </div>
+            </div>
+            
+            <div class="payment-option" onclick="selectPaymentOption('monthly', ${Math.ceil(c.fee/10)})">
+                <input type="radio" name="paymentOption" value="monthly">
+                <div class="payment-details">
+                    <div class="payment-name">10-Month Payment Plan</div>
+                    <div class="payment-amount">₹${Math.ceil(c.fee/10)} per month</div>
+                    <div style="font-size: 0.9rem; color: #64748b;">10 monthly installments</div>
+                </div>
+            </div>
+        </div>
+        
+        <p><em>Admission will be confirmed immediately after payment.</em></p>
+    `;
+    
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-back" onclick="closeModalFunc()">
+            <i class="fas fa-arrow-left"></i> Cancel
+        </button>
+        <button class="modal-btn modal-btn-primary" onclick="showPaymentSummary()">
+            <i class="fas fa-credit-card"></i> Continue
+        </button>
+    `;
+    
+    openModal();
+}
+
+// Show modal for Confirm Seat (When no seats available - FULL PAYMENT for confirmed seat)
+function showConfirmSeatModal(i) {
+    const c = data[i];
+    currentClassIndex = i;
+    
+    modalTitle.textContent = "Confirm Seat";
+    modalBody.innerHTML = `
+        <p>You are booking a confirmed seat for <strong>${c.name}</strong>.</p>
+        
+        <div class="modal-highlight">
+            Full Payment Required: ₹${c.fee}<br>
+            Your Seat Number: ${seatCounter[i]}
+        </div>
+        
+        <p><strong>Important:</strong></p>
+        <ul>
+            <li>Full annual fee of ₹${c.fee} must be paid now</li>
+            <li>This is a <strong>confirmed seat</strong></li>
+            <li>Seat number ${seatCounter[i]} will be assigned to you</li>
+            <li>Admission confirmed immediately after payment</li>
+        </ul>
+        
+        <p><strong>Current Status:</strong></p>
+        <ul>
+            <li>Available Seats: ${c.available}</li>
+            <li>Waiting List: ${c.normalWaiting} / ${WAITING_LIST_LIMIT} students</li>
+        </ul>
+        
+        <p><em>This is direct admission with full payment.</em></p>
+    `;
+    
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-back" onclick="closeModalFunc()">
+            <i class="fas fa-arrow-left"></i> Cancel
+        </button>
+        <button class="modal-btn modal-btn-primary" onclick="confirmDirectSeat()">
+            <i class="fas fa-lock"></i> Pay ₹${c.fee} & Confirm
+        </button>
+    `;
+    
+    openModal();
+}
+
+// Show modal for Normal Waiting (₹100 ONLY) - Jab waiting list full nahi hai
+function showNormalWaitingModal(i) {
+    const c = data[i];
+    currentClassIndex = i;
+    const waitingSpotsLeft = WAITING_LIST_LIMIT - c.normalWaiting;
+    
+    modalTitle.textContent = "Join Waiting List";
+    modalBody.innerHTML = `
+        <p>You are joining the waiting list for <strong>${c.name}</strong>.</p>
+        
+        <div class="modal-highlight">
+            Registration Fee: ₹100 Only<br>
+            Waiting Spots Left: ${waitingSpotsLeft}
+        </div>
+        
+        <p><strong>Current Status:</strong></p>
+        <ul>
+            <li>Available Seats: ${c.available}</li>
+            <li>Waiting List: ${c.normalWaiting} / ${WAITING_LIST_LIMIT} students (you will be ${c.normalWaiting + 1})</li>
+            <li>Waiting Spots Available: ${waitingSpotsLeft}</li>
+        </ul>
+        
+        <p><strong>Important Terms:</strong></p>
+        <ul>
+            <li><strong>Pay only ₹100 registration fee now</strong></li>
+            <li>No seat number will be assigned</li>
+            <li>When seat becomes available, you will be notified</li>
+            <li>You will have 48 hours to make full payment of ₹${c.fee}</li>
+            <li>If you don't get seat within 30 days, ₹100 will be refunded</li>
+            <li><strong>Note: Only ${waitingSpotsLeft} spot(s) left in waiting list</strong></li>
+        </ul>
+        
+        <p><em>Only pay full ₹${c.fee} when seat is confirmed for you.</em></p>
+    `;
+    
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-back" onclick="closeModalFunc()">
+            <i class="fas fa-arrow-left"></i> Cancel
+        </button>
+        <button class="modal-btn modal-btn-primary" onclick="joinNormalWaiting()">
+            <i class="fas fa-check"></i> Pay ₹100 & Join
+        </button>
+    `;
+    
+    openModal();
+}
+
+// Show payment summary for available seats
+function showPaymentSummary() {
+    const c = data[currentClassIndex];
+    let paymentAmount = c.fee;
+    let paymentPlan = "Yearly (One-time)";
+    
+    if (selectedPaymentOption === 'quarterly') {
+        paymentAmount = Math.ceil(c.fee/4);
+        paymentPlan = "Quarterly (4 payments)";
+    } else if (selectedPaymentOption === 'monthly') {
+        paymentAmount = Math.ceil(c.fee/10);
+        paymentPlan = "10-Month Plan (10 installments)";
+    }
+    
+    modalTitle.textContent = "Payment Summary";
+    modalBody.innerHTML = `
+        <p><strong>Admission Details:</strong></p>
+        <ul>
+            <li>Class: ${c.name}</li>
+            <li><strong>Seat Number: ${seatCounter[currentClassIndex]}</strong></li>
+            <li>Total Annual Fee: ₹${c.fee}</li>
+            <li>Selected Plan: ${paymentPlan}</li>
+        </ul>
+        
+        <div class="modal-highlight">
+            Amount to Pay Now: ₹${paymentAmount}
+        </div>
+        
+        <p>By confirming, you agree to the payment terms and conditions.</p>
+    `;
+    
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-back" onclick="showPaySeatModal(${currentClassIndex})">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <button class="modal-btn modal-btn-primary" onclick="confirmAdmission()">
+            <i class="fas fa-check"></i> Confirm Payment
+        </button>
+    `;
+}
+
+// Functions for actions
+function confirmAdmission() {
+    const c = data[currentClassIndex];
+    
+    // Calculate payment amount based on selected plan
+    let paymentAmount = c.fee;
+    let paymentPlan = "Yearly";
+    
+    if (selectedPaymentOption === 'quarterly') {
+        paymentAmount = Math.ceil(c.fee/4);
+        paymentPlan = "Quarterly (first installment)";
+    } else if (selectedPaymentOption === 'monthly') {
+        paymentAmount = Math.ceil(c.fee/10);
+        paymentPlan = "10-Month Plan (first installment)";
+    }
+    
+    // Assign current seat number
+    const assignedSeat = seatCounter[currentClassIndex];
+    
+    // Update data - reduce available seats
+    data[currentClassIndex].available--;
+    seatCounter[currentClassIndex]++; // Increment for next student
+    
+    // Check if class should close after this admission
+    if (data[currentClassIndex].available === 0 && 
+        (data[currentClassIndex].normalWaiting === 0 || 
+         data[currentClassIndex].normalWaiting >= WAITING_LIST_LIMIT)) {
+        data[currentClassIndex].isClosed = true;
+    }
+    
+    showSuccessMessage(`
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>Admission Confirmed!</h3>
+        <p><strong>${c.name}</strong></p>
+        <div style="background: #f0fdf4; padding: 15px; border-radius: 10px; margin: 15px 0;">
+            <div style="font-size: 1.3rem; color: #10b981; font-weight: bold;">
+                Seat Number: ${assignedSeat}
+            </div>
+            <div style="font-size: 1.2rem; margin-top: 10px;">
+                Paid: ₹${paymentAmount}
+            </div>
+            <div style="font-size: 1rem; color: #64748b;">
+                Payment Plan: ${paymentPlan}
+            </div>
+        </div>
+        <p><strong>Updated Status:</strong></p>
+        <ul>
+            <li>Available Seats: ${data[currentClassIndex].available}</li>
+            <li>Waiting List: ${data[currentClassIndex].normalWaiting} / ${WAITING_LIST_LIMIT}</li>
+            ${data[currentClassIndex].isClosed ? `<li style="color: #dc2626;">Admission Now Closed</li>` : ''}
+        </ul>
+        <p>Your admission is now confirmed.</p>
+        <p>Admission details have been sent to your email.</p>
+    `);
+}
+
+function confirmDirectSeat() {
+    const c = data[currentClassIndex];
+    
+    // Assign current seat number
+    const assignedSeat = seatCounter[currentClassIndex];
+    
+    // Update seat counter for next student
+    seatCounter[currentClassIndex]++;
+    
+    // Waiting list kam ho sakta hai agar koi waiting list se promote ho
+    if (c.normalWaiting > 0) {
+        data[currentClassIndex].normalWaiting--;
+    }
+    
+    // Check if class should close
+    if (data[currentClassIndex].available === 0 && 
+        (data[currentClassIndex].normalWaiting === 0 || 
+         data[currentClassIndex].normalWaiting >= WAITING_LIST_LIMIT)) {
+        data[currentClassIndex].isClosed = true;
+    }
+    
+    showSuccessMessage(`
+        <div class="success-icon" style="color: #3b82f6;">
+            <i class="fas fa-lock"></i>
+        </div>
+        <h3>Seat Confirmed!</h3>
+        <p><strong>${c.name}</strong></p>
+        <div style="background: #eff6ff; padding: 15px; border-radius: 10px; margin: 15px 0;">
+            <div style="font-size: 1.3rem; color: #3b82f6; font-weight: bold;">
+                Seat Number: ${assignedSeat}
+            </div>
+            <div style="font-size: 1.2rem; margin-top: 10px;">
+                Paid: ₹${c.fee} (Full Payment)
+            </div>
+            <div style="font-size: 1rem; color: #64748b;">
+                Direct Confirmed Seat
+            </div>
+        </div>
+        <p><strong>Updated Status:</strong></p>
+        <ul>
+            <li>Available Seats: ${data[currentClassIndex].available}</li>
+            <li>Waiting List: ${data[currentClassIndex].normalWaiting} / ${WAITING_LIST_LIMIT}</li>
+            ${data[currentClassIndex].isClosed ? `<li style="color: #dc2626;">Admission Now Closed</li>` : ''}
+        </ul>
+        <p>Your seat is now confirmed.</p>
+        <p>Admission details have been sent to your email.</p>
+    `);
+}
+
+function joinNormalWaiting() {
+    const c = data[currentClassIndex];
+    
+    // Check if waiting list is full
+    if (c.normalWaiting >= WAITING_LIST_LIMIT) {
+        alert(`Sorry, waiting list is full. Maximum ${WAITING_LIST_LIMIT} students allowed.`);
+        return;
+    }
+    
+    // Add to normal waiting count
+    data[currentClassIndex].normalWaiting++;
+    
+    // Check if waiting list is now full
+    const waitingListFull = data[currentClassIndex].normalWaiting >= WAITING_LIST_LIMIT;
+    
+    // If waiting list full and no seats available, close class
+    if (data[currentClassIndex].available === 0 && waitingListFull) {
+        data[currentClassIndex].isClosed = true;
+    }
+    
+    const spotsLeft = WAITING_LIST_LIMIT - data[currentClassIndex].normalWaiting;
+    
+    showSuccessMessage(`
+        <div class="success-icon" style="color: #f59e0b;">
+            <i class="fas fa-list-alt"></i>
+        </div>
+        <h3>Added to Waiting List!</h3>
+        <p><strong>${c.name}</strong></p>
+        <div style="background: #fef3c7; padding: 15px; border-radius: 10px; margin: 15px 0;">
+            <div style="font-size: 1.2rem; margin-top: 10px;">
+                Paid: ₹100 (Registration Fee)
+            </div>
+            <div style="font-size: 1rem; color: #64748b;">
+                Position: ${data[currentClassIndex].normalWaiting} / ${WAITING_LIST_LIMIT}
+            </div>
+            <div style="font-size: 0.9rem; color: #92400e; margin-top: 5px;">
+                Waiting Spots Left: ${spotsLeft}
+            </div>
+        </div>
+        <p><strong>Updated Status:</strong></p>
+        <ul>
+            <li>Available Seats: ${data[currentClassIndex].available}</li>
+            <li>Waiting List: ${data[currentClassIndex].normalWaiting} / ${WAITING_LIST_LIMIT} (your position)</li>
+            ${data[currentClassIndex].isClosed ? `<li style="color: #dc2626;">Waiting List Now Full - Admission Closed</li>` : 
+             waitingListFull ? `<li style="color: #dc2626;">Waiting List Now Full</li>` : ''}
+        </ul>
+        <p>You are now in waiting list.</p>
+        <p>No seat number assigned at this time.</p>
+        <p>You will be contacted when a seat becomes available.</p>
+        <p>Registration confirmation sent to your email.</p>
+    `);
+}
+
+// Helper function to select payment option
+function selectPaymentOption(option, amount) {
+    selectedPaymentOption = option;
+    
+    // Update UI
+    document.querySelectorAll('.payment-option').forEach(el => {
+        el.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+    
+    // Update radio buttons
+    document.querySelectorAll('input[name="paymentOption"]').forEach(radio => {
+        radio.checked = radio.value === option;
+    });
+}
+
+// Show success message
+function showSuccessMessage(message) {
+    modalTitle.textContent = "Success!";
+    modalBody.innerHTML = `
+        <div class="success-modal">
+            ${message}
+        </div>
+    `;
+    
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-primary" onclick="closeModalAndRefresh()" style="width: 100%;">
+            <i class="fas fa-check"></i> Done
+        </button>
+    `;
+}
+
+// Helper functions
+function openModal() {
+    modalOverlay.classList.add('active');
+    document.body.classList.add('modal-open');
+}
+
+function closeModalFunc() {
+    modalOverlay.classList.remove('active');
+    document.body.classList.remove('modal-open');
+}
+
+function closeModalAndRefresh() {
+    closeModalFunc();
+    render();
+}
+
+// Event listeners
+closeModal.addEventListener("click", closeModalFunc);
+
+modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) {
+        closeModalFunc();
+    }
+});
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalOverlay.classList.contains('active')) {
+        closeModalFunc();
+    }
+});
+
+// Initial render
+render();
+</script>
+</body>
+</html>

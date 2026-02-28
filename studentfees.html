@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Fees Trend Chart (Variable Payments)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .sidebar {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .class-selector {
+            margin-bottom: 25px;
+        }
+        .class-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .class-btn {
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+        }
+        .class-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .class-btn.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        .student-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .student-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 5px solid #4f46e5;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        .student-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .student-item.active {
+            background: #eef2ff;
+            border-left-color: #10b981;
+        }
+        .student-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        .student-details {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+        .chart-area {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f1f1;
+        }
+        .student-title {
+            font-size: 22px;
+            color: #333;
+            font-weight: bold;
+        }
+        .payment-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .summary-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+        .summary-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 10px 0;
+        }
+        .summary-card .amount {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .total-fees { color: #4f46e5; }
+        .paid { color: #10b981; }
+        .pending { color: #ef4444; }
+        .progress-percent { color: #f59e0b; }
+        
+        .month-details {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 25px;
+        }
+        .month-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+        .month-card:hover {
+            border-color: #4f46e5;
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.1);
+        }
+        .month-card.paid-full {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .month-card.paid-partial {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+        .month-card.paid-extra {
+            border-color: #8b5cf6;
+            background: #f5f3ff;
+        }
+        .month-card.unpaid {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        .month-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .month-amount {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .month-status {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .status-full {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-extra {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+        .status-none {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .trend-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        .trend-info h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .payment-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .month-details {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .payment-summary, .month-details {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 15px;
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Student Fees Trend Analysis System</h1>
+        <div class="subtitle">Track variable monthly payments with interactive trend charts (July 2024 - April 2025)</div>
+        
+        <div class="dashboard">
+            <!-- Sidebar with class and student selection -->
+            <div class="sidebar">
+                <div class="class-selector">
+                    <h3>Select Class</h3>
+                    <div class="class-buttons">
+                        <div class="class-btn active" onclick="selectClass(5)">5th<br>₹7000</div>
+                        <div class="class-btn" onclick="selectClass(6)">6th<br>₹7500</div>
+                        <div class="class-btn" onclick="selectClass(7)">7th<br>₹8000</div>
+                        <div class="class-btn" onclick="selectClass(8)">8th<br>₹8500</div>
+                        <div class="class-btn" onclick="selectClass(9)">9th<br>₹9000</div>
+                        <div class="class-btn" onclick="selectClass(10)">10th<br>₹9300</div>
+                    </div>
+                </div>
+                
+                <h3>Students List</h3>
+                <div class="student-list" id="studentList">
+                    <!-- Students will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Main chart area -->
+            <div class="chart-area">
+                <div class="chart-header">
+                    <div class="student-title" id="selectedStudentTitle">Select a student to view fee trend</div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+                
+                <!-- Payment Summary -->
+                <div class="payment-summary" id="paymentSummary" style="display: none;">
+                    <div class="summary-card">
+                        <h3>Total Annual Fees</h3>
+                        <div class="amount total-fees" id="totalFees">₹0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Paid</h3>
+                        <div class="amount paid" id="totalPaid">₹0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Pending</h3>
+                        <div class="amount pending" id="totalPending">₹0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Payment Progress</h3>
+                        <div class="amount progress-percent" id="progressPercent">0%</div>
+                    </div>
+                </div>
+                
+                <!-- Monthly Details -->
+                <div class="month-details" id="monthDetails" style="display: none;">
+                    <!-- Month cards will be loaded here -->
+                </div>
+                
+                <!-- Trend Analysis -->
+                <div class="trend-info" id="trendInfo" style="display: none;">
+                    <h3>📊 Payment Trend Analysis</h3>
+                    <div id="trendAnalysisText">Loading analysis...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const classFees = {
+            5: 7000,   // ₹700/month
+            6: 7500,   // ₹750/month
+            7: 8000,   // ₹800/month
+            8: 8500,   // ₹850/month
+            9: 9000,   // ₹900/month
+            10: 9300   // ₹930/month
+        };
+
+        // July to April (10 months)
+        const months = ["July '24", "Aug '24", "Sep '24", "Oct '24", "Nov '24", 
+                       "Dec '24", "Jan '25", "Feb '25", "Mar '25", "Apr '25"];
+        
+        const monthFullNames = [
+            "July 2024", "August 2024", "September 2024", "October 2024", "November 2024",
+            "December 2024", "January 2025", "February 2025", "March 2025", "April 2025"
+        ];
+
+        // Generate realistic Indian student names
+        const firstNames = ["Aarav", "Vivaan", "Aditya", "Vihaan", "Arjun", "Sai", "Reyansh", "Mohammed", 
+                           "Ananya", "Diya", "Aadhya", "Ishita", "Myra", "Sara", "Anika", "Kiara",
+                           "Rohan", "Krishna", "Atharv", "Kabir", "Rudra", "Dhruv", "Veer", "Shivansh",
+                           "Priya", "Neha", "Riya", "Sneha", "Tanvi", "Pooja"];
+        const lastNames = ["Sharma", "Verma", "Patel", "Singh", "Kumar", "Gupta", "Reddy", "Mehta", 
+                          "Choudhary", "Jain", "Malhotra", "Chauhan", "Thakur", "Yadav", "Pandey"];
+
+        // Generate RANDOM payment amounts (variable payments)
+        function generateVariablePayments(classNum) {
+            const monthlyFee = classFees[classNum] / 10;
+            let payments = [];
+            
+            // Generate 10 months of variable payments
+            for(let i = 0; i < 10; i++) {
+                const rand = Math.random();
+                
+                if(rand < 0.15) {
+                    // 15% chance: No payment
+                    payments.push(0);
+                } 
+                else if(rand < 0.25) {
+                    // 10% chance: Advance payment (2-3 months)
+                    payments.push(monthlyFee * (2 + Math.random()));
+                }
+                else if(rand < 0.50) {
+                    // 25% chance: Partial payment (30-90%)
+                    payments.push(monthlyFee * (0.3 + Math.random() * 0.6));
+                }
+                else if(rand < 0.75) {
+                    // 25% chance: Exact monthly fee
+                    payments.push(monthlyFee);
+                }
+                else if(rand < 0.90) {
+                    // 15% chance: Random amount like 1565, 1200, etc.
+                    const randomAmounts = [1565, 1200, 1800, 900, 2100, 2500, 800, 1500];
+                    payments.push(randomAmounts[Math.floor(Math.random() * randomAmounts.length)]);
+                }
+                else {
+                    // 10% chance: Extra payment
+                    payments.push(monthlyFee * (1.2 + Math.random() * 0.8));
+                }
+            }
+            
+            // Round all amounts
+            payments = payments.map(amount => Math.round(amount));
+            
+            // Ensure total doesn't exceed annual fees (but can be less)
+            const totalPaid = payments.reduce((a, b) => a + b, 0);
+            if(totalPaid > classFees[classNum]) {
+                const factor = classFees[classNum] / totalPaid;
+                payments = payments.map(p => Math.round(p * factor));
+            }
+            
+            return payments;
+        }
+
+        // Generate all students data
+        let allStudents = {};
+        let currentClass = 5;
+        let selectedStudent = null;
+        let trendChart = null;
+
+        // Initialize data for all classes
+        for(let classNum = 5; classNum <= 10; classNum++) {
+            allStudents[classNum] = [];
+            const studentCount = 20 + Math.floor(Math.random() * 6); // 20-25 students
+            
+            for(let i = 1; i <= studentCount; i++) {
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                
+                allStudents[classNum].push({
+                    id: `C${classNum}S${i}`,
+                    roll: i,
+                    name: `${firstName} ${lastName}`,
+                    fees: generateVariablePayments(classNum),
+                    totalFees: classFees[classNum],
+                    monthlyFee: classFees[classNum] / 10
+                });
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadClassStudents(5);
+        });
+
+        // Select class
+        function selectClass(classNum) {
+            currentClass = classNum;
+            
+            // Update active class button
+            document.querySelectorAll('.class-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load students for this class
+            loadClassStudents(classNum);
+            
+            // Reset selection
+            resetStudentSelection();
+        }
+
+        // Load students for selected class
+        function loadClassStudents(classNum) {
+            const studentList = document.getElementById('studentList');
+            studentList.innerHTML = '';
+            
+            const students = allStudents[classNum];
+            students.forEach(student => {
+                const totalPaid = student.fees.reduce((a, b) => a + b, 0);
+                const pending = student.totalFees - totalPaid;
+                const paidMonths = student.fees.filter(fee => fee > 0).length;
+                
+                const studentItem = document.createElement('div');
+                studentItem.className = 'student-item';
+                studentItem.innerHTML = `
+                    <div class="student-name">${student.name}</div>
+                    <div class="student-details">
+                        <span>Roll: ${student.roll}</span>
+                        <span>Paid: ₹${totalPaid}</span>
+                    </div>
+                `;
+                
+                studentItem.onclick = () => selectStudent(student);
+                studentList.appendChild(studentItem);
+            });
+        }
+
+        // Select a student
+        function selectStudent(student) {
+            selectedStudent = student;
+            
+            // Update active student in list
+            document.querySelectorAll('.student-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update UI
+            updateStudentDetails(student);
+            
+            // Draw trend chart
+            drawTrendChart(student);
+        }
+
+        // Update student details in UI
+        function updateStudentDetails(student) {
+            const totalPaid = student.fees.reduce((a, b) => a + b, 0);
+            const pending = student.totalFees - totalPaid;
+            const progress = Math.round((totalPaid / student.totalFees) * 100);
+            
+            // Update title
+            document.getElementById('selectedStudentTitle').textContent = 
+                `${student.name} - Class ${currentClass} (Roll No: ${student.roll})`;
+            
+            // Update summary cards
+            document.getElementById('totalFees').textContent = `₹${student.totalFees}`;
+            document.getElementById('totalPaid').textContent = `₹${totalPaid}`;
+            document.getElementById('totalPending').textContent = `₹${pending}`;
+            document.getElementById('progressPercent').textContent = `${progress}%`;
+            
+            // Show summary
+            document.getElementById('paymentSummary').style.display = 'grid';
+            
+            // Update month details
+            updateMonthDetails(student);
+            
+            // Update trend analysis
+            updateTrendAnalysis(student);
+        }
+
+        // Update month details cards
+        function updateMonthDetails(student) {
+            const monthDetails = document.getElementById('monthDetails');
+            monthDetails.innerHTML = '';
+            monthDetails.style.display = 'grid';
+            
+            const monthlyFee = student.monthlyFee;
+            
+            student.fees.forEach((amount, index) => {
+                let status = '';
+                let statusClass = '';
+                let cardClass = '';
+                
+                if(amount === 0) {
+                    status = 'Unpaid';
+                    statusClass = 'status-none';
+                    cardClass = 'unpaid';
+                } else if(amount >= monthlyFee * 1.1) {
+                    status = 'Extra Paid';
+                    statusClass = 'status-extra';
+                    cardClass = 'paid-extra';
+                } else if(amount >= monthlyFee) {
+                    status = 'Full Paid';
+                    statusClass = 'status-full';
+                    cardClass = 'paid-full';
+                } else if(amount >= monthlyFee * 0.5) {
+                    status = 'Partial';
+                    statusClass = 'status-partial';
+                    cardClass = 'paid-partial';
+                } else {
+                    status = 'Low Payment';
+                    statusClass = 'status-partial';
+                    cardClass = 'paid-partial';
+                }
+                
+                const monthCard = document.createElement('div');
+                monthCard.className = `month-card ${cardClass}`;
+                monthCard.innerHTML = `
+                    <div class="month-name">${months[index]}</div>
+                    <div class="month-amount">₹${amount}</div>
+                    <div class="month-status ${statusClass}">${status}</div>
+                    <div style="font-size:11px; margin-top:5px; color:#666;">
+                        ${amount === 0 ? 'Due: ₹' + monthlyFee : 
+                          amount > monthlyFee ? 'Extra: ₹' + (amount - monthlyFee) :
+                          'Due: ₹' + (monthlyFee - amount)}
+                    </div>
+                `;
+                
+                monthDetails.appendChild(monthCard);
+            });
+        }
+
+        // Update trend analysis text
+        function updateTrendAnalysis(student) {
+            const totalPaid = student.fees.reduce((a, b) => a + b, 0);
+            const monthlyFee = student.monthlyFee;
+            
+            let analysis = '';
+            
+            // Calculate statistics
+            const zeroMonths = student.fees.filter(f => f === 0).length;
+            const partialMonths = student.fees.filter(f => f > 0 && f < monthlyFee).length;
+            const fullMonths = student.fees.filter(f => f >= monthlyFee && f < monthlyFee * 1.1).length;
+            const extraMonths = student.fees.filter(f => f >= monthlyFee * 1.1).length;
+            
+            // Find highest and lowest payments
+            const maxPayment = Math.max(...student.fees);
+            const minPayment = Math.min(...student.fees.filter(f => f > 0));
+            const maxMonthIndex = student.fees.indexOf(maxPayment);
+            const minMonthIndex = student.fees.indexOf(minPayment);
+            
+            // Calculate average payment
+            const avgPayment = totalPaid / student.fees.filter(f => f > 0).length;
+            
+            analysis += `
+                <p><strong>📈 Payment Pattern:</strong> ${student.name} has paid ₹${totalPaid} out of ₹${student.totalFees} (${Math.round(totalPaid/student.totalFees*100)}%)</p>
+                <p><strong>📅 Monthly Breakdown:</strong> ${fullMonths} full payments, ${partialMonths} partial, ${extraMonths} extra, ${zeroMonths} unpaid months</p>
+                <p><strong>💰 Highest Payment:</strong> ₹${maxPayment} in ${months[maxMonthIndex]} ${maxPayment > monthlyFee*2 ? '(Advance Payment!)' : ''}</p>
+                <p><strong>💸 Lowest Payment:</strong> ₹${minPayment} in ${months[minMonthIndex]} ${minPayment < monthlyFee*0.3 ? '(Very Low!)' : ''}</p>
+                <p><strong>📊 Average Payment:</strong> ₹${Math.round(avgPayment)} per month (Monthly fee: ₹${monthlyFee})</p>
+            `;
+            
+            // Add trend comments
+            if(zeroMonths >= 3) {
+                analysis += `<p style="color:#fbbf24;">⚠️ <strong>Alert:</strong> Multiple unpaid months detected!</p>`;
+            }
+            if(extraMonths >= 2) {
+                analysis += `<p style="color:#10b981;">✅ <strong>Good:</strong> Advance payments detected in multiple months</p>`;
+            }
+            if(totalPaid >= student.totalFees) {
+                analysis += `<p style="color:#10b981;">🎉 <strong>Excellent:</strong> Full annual fees already paid!</p>`;
+            }
+            
+            document.getElementById('trendAnalysisText').innerHTML = analysis;
+            document.getElementById('trendInfo').style.display = 'block';
+        }
+
+        // Draw TREND LINE CHART
+        function drawTrendChart(student) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            // Destroy previous chart
+            if(trendChart) {
+                trendChart.destroy();
+            }
+            
+            const monthlyFee = student.monthlyFee;
+            const expectedLine = Array(10).fill(monthlyFee);
+            
+            // Calculate cumulative payments for trend line
+            let cumulativePayments = [];
+            let cumulative = 0;
+            student.fees.forEach(payment => {
+                cumulative += payment;
+                cumulativePayments.push(cumulative);
+            });
+            
+            // Calculate expected cumulative
+            let expectedCumulative = [];
+            let expectedCum = 0;
+            expectedLine.forEach(fee => {
+                expectedCum += fee;
+                expectedCumulative.push(expectedCum);
+            });
+            
+            // Create gradient for trend line
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(79, 70, 229, 0.8)');
+            gradient.addColorStop(1, 'rgba(79, 70, 229, 0.1)');
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Expected Monthly Fee',
+                            data: expectedLine,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.3,
+                            pointRadius: 0,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Actual Monthly Payment',
+                            data: student.fees,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: student.fees.map(f => {
+                                if(f === 0) return '#ef4444';
+                                if(f >= monthlyFee * 1.1) return '#8b5cf6';
+                                if(f >= monthlyFee) return '#10b981';
+                                return '#f59e0b';
+                            }),
+                            pointRadius: 6,
+                            pointHoverRadius: 10,
+                            pointBorderWidth: 2,
+                            pointBorderColor: 'white'
+                        },
+                        {
+                            label: 'Cumulative Payment Trend',
+                            data: cumulativePayments,
+                            borderColor: '#4f46e5',
+                            backgroundColor: gradient,
+                            borderWidth: 4,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    family: "'Segoe UI', Arial, sans-serif"
+                                },
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#1f2937',
+                            bodyColor: '#4b5563',
+                            borderColor: '#e5e7eb',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    const value = context.parsed.y;
+                                    
+                                    if(context.datasetIndex === 0) {
+                                        return `${label}: ₹${value} (Monthly Fee)`;
+                                    } 
+                                    else if(context.datasetIndex === 1) {
+                                        const diff = value - monthlyFee;
+                                        let status = '';
+                                        if(value === 0) status = ' ❌ Unpaid';
+                                        else if(diff > 0) status = ` ✅ Extra: ₹${diff}`;
+                                        else if(diff < 0) status = ` ⚠ Short: ₹${-diff}`;
+                                        else status = ' ✓ Exact';
+                                        
+                                        return `${label}: ₹${value}${status}`;
+                                    }
+                                    else {
+                                        return `${label}: ₹${value}`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Monthly Payment (₹)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value;
+                                },
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Cumulative Total (₹)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+            // Set chart container height
+            document.querySelector('.chart-container').style.height = '400px';
+        }
+
+        // Reset student selection
+        function resetStudentSelection() {
+            selectedStudent = null;
+            document.getElementById('selectedStudentTitle').textContent = 'Select a student to view fee trend';
+            document.getElementById('paymentSummary').style.display = 'none';
+            document.getElementById('monthDetails').style.display = 'none';
+            document.getElementById('trendInfo').style.display = 'none';
+            
+            if(trendChart) {
+                trendChart.destroy();
+                trendChart = null;
+            }
+            
+            // Clear active student
+            document.querySelectorAll('.student-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        // Initialize with Class 5
+        loadClassStudents(5);
+    </script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teachers - EduManage</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,sans-serif}
+    body{background:#f8f9fc;padding:16px;color:#333;line-height:1.4}
+
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:3px solid #5e60ce}
+    h1{font-size:24px;color:#2f2f68}
+    h1 i{color:#5e60ce;margin-right:8px}
+
+    .btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px;transition:.2s}
+    .btn-primary{background:#5e60ce;color:white}
+    .btn-primary:hover{background:#4d4fc1}
+    .btn-dark{background:#2f2f68;color:white}
+    .btn-dark:hover{background:#1e1e4a}
+    .btn-save{background:#48cae4;color:white;width:100%;padding:12px;font-weight:600}
+    .btn-save:hover{background:#00b4d8}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+    .card{background:white;border-radius:12px;padding:16px;box-shadow:0 3px 12px rgba(94,96,206,.12);border:1px solid #eee;transition:.2s}
+    .card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(94,96,206,.2)}
+
+    .top{display:flex;gap:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed #ddd}
+    .img{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #5e60ce}
+
+    .info h3{font-size:18px;margin-bottom:4px;color:#2f2f68}
+    .info p{font-size:13px;color:#555;margin:3px 0}
+    .info i{color:#5e60ce;width:16px;margin-right:5px}
+
+    .salary{background:linear-gradient(135deg,#5e60ce,#48cae4);color:white;padding:12px;border-radius:10px;text-align:center;margin:12px 0}
+    .amount{font-size:26px;font-weight:700;margin:6px 0}
+
+    .grid-small{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}
+    .item{background:#f8f9fc;padding:8px;border-radius:6px;border-left:3px solid #5e60ce}
+    .label{font-size:11px;color:#666}
+    .value{font-size:14px;font-weight:600;color:#2f2f68}
+
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;padding:16px}
+    .modal-box{background:white;border-radius:12px;width:100%;max-width:900px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+    .mhead{padding:14px 20px;background:#2f2f68;color:white;display:flex;justify-content:space-between;align-items:center;border-radius:12px 12px 0 0}
+    .close{background:none;border:none;color:white;font-size:28px;cursor:pointer}
+
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{background:#f1f3f9;padding:10px;text-align:left;color:#2f2f68;border-bottom:2px solid #5e60ce}
+    td{padding:8px 10px;border-bottom:1px solid #eee}
+    .mini{width:32px;height:32px;border-radius:50%;object-fit:cover}
+
+    .form{padding:20px}
+    .group{margin-bottom:14px}
+    .group label{display:block;margin-bottom:5px;font-size:13px;color:#2f2f68;font-weight:500}
+    input, .upload{width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:14px}
+    input:focus{border-color:#5e60ce;outline:none}
+    .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+    .upload{border:2px dashed #5e60ce;padding:20px;text-align:center;cursor:pointer;background:#f8f9fc;border-radius:8px}
+    .upload:hover{background:#f0f4ff}
+
+    @media (max-width:600px){.grid{grid-template-columns:1fr} header{flex-direction:column;gap:12px;text-align:center}}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><i class="fas fa-chalkboard-teacher"></i> Teachers</h1>
+  <button class="btn btn-primary" id="add"><i class="fas fa-plus"></i> Add</button>
+</header>
+
+<div class="grid" id="cards"></div>
+
+<!-- All Teachers Modal -->
+<div id="mAll" class="modal">
+  <div class="modal-box">
+    <div class="mhead">
+      <h2><i class="fas fa-users"></i> All Teachers</h2>
+      <button class="close" id="cAll">×</button>
+    </div>
+    <div class="form"><table><thead><tr><th>#</th><th>Photo</th><th>Name</th><th>Aadhar</th><th>PAN</th><th>Docs</th></tr></thead><tbody id="tbl"></tbody></table></div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div id="mAdd" class="modal">
+  <div class="modal-box">
+    <div class="mhead">
+      <h2><i class="fas fa-user-plus"></i> New Teacher</h2>
+      <button class="close" id="cAdd">×</button>
+    </div>
+    <div class="form">
+      <div class="group text-center">
+        <div class="upload" id="uph"><i class="fas fa-camera" style="font-size:32px;color:#5e60ce"></i><p>Photo</p><input type="file" id="photo" accept="image/*" hidden></div>
+      </div>
+      <div class="row">
+        <div class="group"><label>Name *</label><input id="nm"></div>
+        <div class="group"><label>Email *</label><input type="email" id="em"></div>
+      </div>
+      <div class="row">
+        <div class="group"><label>DOB *</label><input type="date" id="db"></div>
+        <div class="group"><label>Join Date *</label><input type="date" id="jd" value="2024-01-01"></div>
+      </div>
+      <div class="row">
+        <div class="group"><label>Aadhar *</label><input id="ah"></div>
+        <div class="group"><label>PAN *</label><input id="pn"></div>
+      </div>
+      <div class="group">
+        <label>Documents</label>
+        <div class="upload" id="udh"><i class="fas fa-cloud-upload-alt" style="font-size:32px;color:#5e60ce"></i><p>Files</p><input type="file" id="docs" multiple hidden></div>
+      </div>
+      <button class="btn-save" id="sv"><i class="fas fa-save"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Doc View Modal -->
+<div id="mDoc" class="modal">
+  <div class="modal-box">
+    <div class="mhead">
+      <h2><i class="fas fa-file"></i> Document</h2>
+      <button class="close" id="cDoc">×</button>
+    </div>
+    <div class="form" id="docV"></div>
+  </div>
+</div>
+
+<script>
+const teachers=[
+  {id:1,nm:"Raj Kumar Sharma",em:"raj.sharma@school.com",db:"1985-03-15",jd:"2018-06-01",ah:"1234 5678 9012",pn:"ABCDE1234F",img:"https://randomuser.me/api/portraits/men/32.jpg",docs:[{n:"Aadhar",t:"pdf"},{n:"PAN",t:"pdf"},{n:"Degree",t:"pdf"}],earned:285600,sal:3000},
+  {id:2,nm:"Priya Singh",em:"priya.singh@school.com",db:"1990-07-22",jd:"2020-02-15",ah:"2345 6789 0123",pn:"BCDEF2345G",img:"https://randomuser.me/api/portraits/women/44.jpg",docs:[{n:"Aadhar",t:"pdf"},{n:"PAN",t:"pdf"},{n:"M.Ed",t:"pdf"}],earned:162000,sal:3000},
+  {id:3,nm:"Amit Kumar",em:"amit.kumar@school.com",db:"1988-11-10",jd:"2019-09-01",ah:"3456 7890 1234",pn:"CDEFG3456H",img:"https://randomuser.me/api/portraits/men/67.jpg",docs:[{n:"Aadhar",t:"pdf"},{n:"PAN",t:"pdf"},{n:"B.Ed",t:"pdf"}],earned:198000,sal:3000}
+];
+
+function renderCards(){
+  const c=document.getElementById('cards');c.innerHTML='';
+  teachers.forEach(t=>{
+    const d=document.createElement('div');d.className='card';
+    d.innerHTML=`
+      <div class="top">
+        <img src="${t.img}" class="img">
+        <div class="info">
+          <h3>${t.nm}</h3>
+          <p><i class="fas fa-envelope"></i>${t.em}</p>
+          <p><i class="fas fa-calendar"></i>${new Date(t.db).toLocaleDateString('en-IN')}</p>
+          <p><i class="fas fa-calendar-check"></i>${new Date(t.jd).toLocaleDateString('en-IN')}</p>
+        </div>
+      </div>
+      <div class="salary">
+        <div>Total Earnings</div>
+        <div class="amount">₹${t.earned.toLocaleString()}</div>
+        <div>₹${t.sal}/mo</div>
+      </div>
+      <div class="grid-small">
+        <div class="item"><div class="label">Exp</div><div class="value">${((Date.now()-new Date(t.jd))/31557600000)|0} yrs</div></div>
+        <div class="item"><div class="label">Aadhar</div><div class="value">${t.ah}</div></div>
+        <div class="item"><div class="label">PAN</div><div class="value">${t.pn}</div></div>
+        <div class="item"><div class="label">Docs</div><div class="value">${t.docs.length}</div></div>
+      </div>
+      <button class="btn btn-dark" onclick="showAll()">View All</button>
+    `;
+    c.appendChild(d);
+  });
+}
+
+function renderTable(){
+  const t=document.getElementById('tbl');t.innerHTML='';
+  teachers.forEach((x,i)=>{
+    t.innerHTML+=`<tr><td>${i+1}</td><td><img src="${x.img}" class="mini"></td><td>${x.nm}</td><td>${x.ah}</td><td>${x.pn}</td><td>${x.docs.map((d,j)=>`<i class="fas fa-file-${d.t} doc-icon" style="color:#5e60ce;cursor:pointer" onclick="showDoc(${x.id},${j})"></i>`).join('')}</td></tr>`;
+  });
+}
+
+function showAll(){document.getElementById('mAll').style.display='flex'}
+function hideAll(){document.getElementById('mAll').style.display='none'}
+function hideAdd(){document.getElementById('mAdd').style.display='none'}
+function hideDoc(){document.getElementById('mDoc').style.display='none'}
+
+function showDoc(id,idx){
+  const t=teachers.find(x=>x.id===id),d=t.docs[idx];
+  document.getElementById('docV').innerHTML=`
+    <div style="text-align:center;padding:30px 15px">
+      <i class="fas fa-file-${d.t}" style="font-size:60px;color:#5e60ce"></i>
+      <h3 style="margin:15px 0 6px">${d.n}</h3>
+      <p><b>Teacher:</b> ${t.nm}</p>
+      <p><b>Type:</b> ${d.t.toUpperCase()}</p>
+    </div>`;
+  document.getElementById('mDoc').style.display='flex';
+}
+
+function saveNew(){
+  const n=document.getElementById('nm').value.trim(),e=document.getElementById('em').value.trim();
+  if(!n||!e){alert("Name & Email required");return}
+  teachers.push({
+    id:teachers.length+1,nm:n,em:e,
+    db:document.getElementById('db').value,
+    jd:document.getElementById('jd').value,
+    ah:document.getElementById('ah').value,
+    pn:document.getElementById('pn').value,
+    img:`https://randomuser.me/api/portraits/${Math.random()>.5?'men':'women'}/${Math.floor(Math.random()*70)+1}.jpg`,
+    docs:[{n:"Aadhar",t:"pdf"},{n:"PAN",t:"pdf"}],
+    earned:0,sal:3000
+  });
+  renderCards(); renderTable(); hideAdd(); alert("Saved!");
+}
+
+document.getElementById('add').onclick=()=>document.getElementById('mAdd').style.display='flex';
+document.getElementById('cAll').onclick=hideAll;
+document.getElementById('cAdd').onclick=hideAdd;
+document.getElementById('cDoc').onclick=hideDoc;
+document.getElementById('sv').onclick=saveNew;
+document.getElementById('uph').onclick=()=>document.getElementById('photo').click();
+document.getElementById('udh').onclick=()=>document.getElementById('docs').click();
+
+window.onclick=e=>{if(e.target.classList.contains('modal'))e.target.style.display='none'};
+
+renderCards(); renderTable();
+</script>
+</body>
+</html>

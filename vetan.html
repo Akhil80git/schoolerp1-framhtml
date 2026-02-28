@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Salary - EduManage</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #27ae60;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 32px;
+        }
+
+        .header h1 i {
+            color: #27ae60;
+            margin-right: 10px;
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e0e0e0;
+        }
+
+        .filter-input {
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            min-width: 200px;
+            transition: 0.3s;
+        }
+
+        .filter-input:focus {
+            border-color: #27ae60;
+            outline: none;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #219653;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .rules-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid #27ae60;
+        }
+
+        .rules-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .rule-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .rule-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .rule-value {
+            font-size: 18px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .rule-value small {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .salary-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background-color: #e8f5e9;
+        }
+
+        .teacher-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .teacher-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #27ae60;
+        }
+
+        .amount-positive {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .amount-negative {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .total-salary {
+            background: #27ae60;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            td, th {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-money-bill-wave"></i> Teacher Salary (Vetan)</h1>
+        <button class="btn btn-warning" id="printBtn">
+            <i class="fas fa-print"></i> Print Salary Slip
+        </button>
+    </div>
+
+    <div class="filter-bar">
+        <input type="month" id="monthFilter" class="filter-input" value="2024-01">
+        <select id="teacherFilter" class="filter-input">
+            <option value="all">All Teachers</option>
+        </select>
+        <button class="btn btn-primary" id="calculateBtn">
+            <i class="fas fa-calculator"></i> Calculate Salary
+        </button>
+    </div>
+
+    <div class="rules-card">
+        <h3><i class="fas fa-info-circle" style="color: #27ae60;"></i> Salary Calculation Rules</h3>
+        <div class="rules-grid">
+            <div class="rule-item">
+                <div class="rule-label">Monthly Salary</div>
+                <div class="rule-value">₹3000 <small>(₹100/day)</small></div>
+            </div>
+            <div class="rule-item">
+                <div class="rule-label">Working Hours</div>
+                <div class="rule-value">10:30 AM - 4:00 PM <small>(5.5 hrs)</small></div>
+            </div>
+            <div class="rule-item">
+                <div class="rule-label">Hourly Rate</div>
+                <div class="rule-value">₹18.18 <small>(₹100 ÷ 5.5)</small></div>
+            </div>
+            <div class="rule-item">
+                <div class="rule-label">Late Deduction</div>
+                <div class="rule-value">₹18.18 × late hours</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="salary-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Teacher Name</th>
+                    <th>Working Days</th>
+                    <th>Late Hours</th>
+                    <th>Half Days</th>
+                    <th>Absent Days</th>
+                    <th>Deductions</th>
+                    <th>Final Salary</th>
+                </tr>
+            </thead>
+            <tbody id="salaryTable">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+        
+        <div class="total-salary" id="totalSalary">
+            <!-- Total will be shown here -->
+        </div>
+    </div>
+
+    <script>
+        const teachersData = [
+            {
+                id: 1,
+                name: "Raj Kumar Sharma",
+                image: "https://randomuser.me/api/portraits/men/32.jpg",
+                attendance: {
+                    present: 22,
+                    late: 3,
+                    lateHours: 2.5,
+                    halfDays: 1,
+                    absent: 4
+                }
+            },
+            {
+                id: 2,
+                name: "Priya Singh",
+                image: "https://randomuser.me/api/portraits/women/44.jpg",
+                attendance: {
+                    present: 28,
+                    late: 0,
+                    lateHours: 0,
+                    halfDays: 0,
+                    absent: 2
+                }
+            },
+            {
+                id: 3,
+                name: "Amit Kumar",
+                image: "https://randomuser.me/api/portraits/men/67.jpg",
+                attendance: {
+                    present: 24,
+                    late: 2,
+                    lateHours: 1.5,
+                    halfDays: 0,
+                    absent: 4
+                }
+            },
+            {
+                id: 4,
+                name: "Neha Gupta",
+                image: "https://randomuser.me/api/portraits/women/68.jpg",
+                attendance: {
+                    present: 20,
+                    late: 5,
+                    lateHours: 4,
+                    halfDays: 2,
+                    absent: 3
+                }
+            }
+        ];
+
+        const DAILY_RATE = 100;
+        const HOURLY_RATE = 18.18;
+
+        function loadTeacherFilter() {
+            const select = document.getElementById('teacherFilter');
+            teachersData.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t.id;
+                option.textContent = t.name;
+                select.appendChild(option);
+            });
+        }
+
+        function calculateSalary(filterTeacher = 'all') {
+            const tbody = document.getElementById('salaryTable');
+            tbody.innerHTML = '';
+
+            let filtered = [...teachersData];
+            if (filterTeacher !== 'all') {
+                filtered = filtered.filter(t => t.id == filterTeacher);
+            }
+
+            let totalSalaryAll = 0;
+
+            filtered.forEach((teacher, index) => {
+                const workingDays = teacher.attendance.present + teacher.attendance.late;
+                const baseSalary = workingDays * DAILY_RATE;
+                
+                const lateDeduction = teacher.attendance.lateHours * HOURLY_RATE;
+                const halfDayDeduction = teacher.attendance.halfDays * (DAILY_RATE / 2);
+                const absentDeduction = teacher.attendance.absent * DAILY_RATE;
+                
+                const totalDeduction = lateDeduction + halfDayDeduction + absentDeduction;
+                const finalSalary = baseSalary - totalDeduction;
+                
+                totalSalaryAll += finalSalary;
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <div class="teacher-info">
+                            <img src="${teacher.image}" class="teacher-img">
+                            ${teacher.name}
+                        </div>
+                    </td>
+                    <td>${workingDays}</td>
+                    <td>${teacher.attendance.lateHours} hrs</td>
+                    <td>${teacher.attendance.halfDays}</td>
+                    <td>${teacher.attendance.absent}</td>
+                    <td class="amount-negative">-₹${totalDeduction.toFixed(2)}</td>
+                    <td class="amount-positive">₹${finalSalary.toFixed(2)}</td>
+                `;
+            });
+
+            document.getElementById('totalSalary').innerHTML = `
+                <span><i class="fas fa-calculator"></i> Total Salary for ${filtered.length} Teacher(s)</span>
+                <span><strong>₹${totalSalaryAll.toFixed(2)}</strong></span>
+            `;
+        }
+
+        function printSalarySlip() {
+            const teacher = document.getElementById('teacherFilter').value;
+            if (teacher === 'all') {
+                alert('Please select a specific teacher to print salary slip');
+                return;
+            }
+            alert('Generating salary slip...');
+        }
+
+        // Event Listeners
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            const teacher = document.getElementById('teacherFilter').value;
+            calculateSalary(teacher);
+        });
+
+        document.getElementById('printBtn').addEventListener('click', printSalarySlip);
+
+        document.getElementById('monthFilter').addEventListener('change', (e) => {
+            alert(`Loading salary for ${e.target.value}`);
+            calculateSalary();
+        });
+
+        // Initialize
+        loadTeacherFilter();
+        calculateSalary();
+    </script>
+</body>
+</html>
